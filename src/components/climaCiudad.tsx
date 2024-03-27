@@ -1,19 +1,47 @@
 import { useEffect, useState } from "react";
+import { OpenWeatherResponseType } from "src/lib/api/openweatherResponseType";
 import climaService from "src/lib/climaService.ts";
 
 function ClimaCiudad() {
   const [cityId, setCityId] = useState(0);
+  const [weatherData, setWeatherData] =
+    useState<OpenWeatherResponseType | null>();
+  const [haceMuchoCalor, setHaceMuchoCalor] = useState(false);
+  const [haceMuchoFrio, setHaceMuchoFrio] = useState(false);
 
   const handleChangeCity = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    alert("City Id: " + e.currentTarget.value);
     setCityId(Number(e.currentTarget.value));
   };
+
+  function getDireccion(angle: number): string {
+    const direcciones = ["NE", "E", "SE", "S", "SO", "O", "NO", "N"];
+    if (angle > 360 || angle < 23) return "N";
+
+    const index = Math.floor((angle - 23) / 45);
+    if (index >= 0 && index < direcciones.length) {
+      return direcciones[index];
+    }
+
+    return "";
+  }
 
   useEffect(() => {
     async function getData(cityId: number) {
       if (cityId > 0) {
         const result = await climaService.getClimateData(cityId);
-        console.log(result);
+        setWeatherData(result);
+        if (result?.main?.temp) {
+          if (result.main.temp > 30) {
+            setHaceMuchoCalor(true);
+          } else {
+            setHaceMuchoCalor(false);
+          }
+          if (result.main.temp < 10) {
+            setHaceMuchoFrio(true);
+          } else {
+            setHaceMuchoFrio(false);
+          }
+        }
       }
     }
     getData(cityId);
@@ -50,14 +78,14 @@ function ClimaCiudad() {
           {/* Icono, temperatura */}
           <div className="flex items-center ">
             <img
-              src=" https://openweathermap.org/img/wn/10d@4x.png"
+              src={`https://openweathermap.org/img/wn/${weatherData?.weather[0].icon}@4x.png`}
               alt="Icono del clima"
               className="-mt-5 -ml-10"
             />
             {/* Temperatura */}
             <div>
               <p className="text-7xl font-bold tracking-tight -ml-5">
-                24º
+                {weatherData?.main.temp.toFixed(1)}º
                 <span className="text-2xl -ml-4"> C</span>
               </p>
             </div>
@@ -65,16 +93,20 @@ function ClimaCiudad() {
           {/* Estado del tiempo */}
           <div>
             <p className="text-lg font-bold tracking-tight text-center">
-              Parcialmente nublado
+              {weatherData?.weather[0]?.description}
             </p>
           </div>
           <div>
-            <p className="text-base font-bold text-center text-red-600 ">
-              Hace mucho calor 🥵
-            </p>
-            <p className="text-base font-bold text-center text-blue-700 ">
-              Hace mucho frío 🥶
-            </p>
+            {haceMuchoCalor && (
+              <p className="text-base font-bold text-center text-red-600 ">
+                Hace mucho calor 🥵
+              </p>
+            )}
+            {haceMuchoFrio && (
+              <p className="text-base font-bold text-center text-blue-700 ">
+                Hace mucho frío 🥶
+              </p>
+            )}
           </div>
         </div>
         {/* Tabla de valores */}
@@ -82,15 +114,22 @@ function ClimaCiudad() {
           {/* Container */}
           <div className="grid grid-cols-[minmax(150px,_1fr)_80px] gap-x-10 gap-y-2">
             <p>Sensación térmica</p>
-            <p className="text-right">25ºC</p>
+            <p className="text-right">
+              {weatherData?.main.feels_like.toFixed(1)}ºC
+            </p>
             <p>Presión</p>
-            <p className="text-right">1018 hPa</p>
+            <p className="text-right">{weatherData?.main.pressure} hPa</p>
             <p>Humedad</p>
-            <p className="text-right">68%</p>
+            <p className="text-right">{weatherData?.main.humidity}%</p>
             <p>Visibilidad</p>
-            <p className="text-right">10000 m</p>
+            <p className="text-right">
+              {(weatherData?.visibility && 0 / 1000)?.toFixed(0)} m
+            </p>
             <p>Viento</p>
-            <p className="text-right">24Km E</p>
+            <p className="text-right">
+              {weatherData?.wind.speed}{" "}
+              {weatherData?.wind.deg && getDireccion(weatherData?.wind.deg)}
+            </p>
           </div>
         </div>
       </div>
