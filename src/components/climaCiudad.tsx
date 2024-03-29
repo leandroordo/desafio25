@@ -3,7 +3,7 @@ import { OpenWeatherResponseType } from "src/lib/api/openweatherResponseType";
 import climaService from "src/lib/climaService.ts";
 
 function ClimaCiudad() {
-  const [cityId, setCityId] = useState(0);
+  const [cityId, setCityId] = useState(3433955);
   const [weatherData, setWeatherData] =
     useState<OpenWeatherResponseType | null>();
   const [haceMuchoCalor, setHaceMuchoCalor] = useState(false);
@@ -29,6 +29,7 @@ function ClimaCiudad() {
     async function getData(cityId: number) {
       if (cityId > 0) {
         const result = await climaService.getClimateData(cityId);
+        console.log(result);
         setWeatherData(result);
         if (result?.main?.temp) {
           if (result.main.temp > 30) {
@@ -62,13 +63,18 @@ function ClimaCiudad() {
             handleChangeCity(e)
           }
         >
-          <option value="3433955">Buenos Aires</option>
-          <option value="6359304">Madrid</option>
-          <option value="5128638">Nueva York</option>
-          <option value="2988506">París</option>
-          <option value="3451189">Río de Janeiro</option>
-          <option value="3169070">Roma</option>
-          <option value="3871336">Santiago de Chile</option>
+          <option value="3433955">Buenos Aires (Argentina)</option>
+          <option value="2673722">Estocolmo (Suecia)</option>
+          <option value="4855951">Fairbank (Alaska)</option>
+          <option value="105343">Jeda (Arabia Saudita)</option>
+          <option value="6359304">Madrid (España)</option>
+          <option value="524894">Moscú (Rusia)</option>
+          <option value="5128638">Nueva York (EEUU)</option>
+          <option value="2988506">París (Francia)</option>
+          <option value="3451189">Río de Janeiro (Brasil)</option>
+          <option value="3169070">Roma (Italia)</option>
+          <option value="3871336">Santiago (Chile)</option>
+          <option value="2357048">Uagadugú (Burkina Faso)</option>
         </select>
       </div>
       {/* Información */}
@@ -112,7 +118,7 @@ function ClimaCiudad() {
         {/* Tabla de valores */}
         <div className="mx-auto">
           {/* Container */}
-          <div className="grid grid-cols-[minmax(150px,_1fr)_80px] gap-x-10 gap-y-2">
+          <div className="grid grid-cols-[minmax(100px,_1fr)_100px] gap-x-10 gap-y-2">
             <p>Sensación térmica</p>
             <p className="text-right">
               {weatherData?.main.feels_like.toFixed(1)}ºC
@@ -123,11 +129,12 @@ function ClimaCiudad() {
             <p className="text-right">{weatherData?.main.humidity}%</p>
             <p>Visibilidad</p>
             <p className="text-right">
-              {(weatherData?.visibility && 0 / 1000)?.toFixed(0)} m
+              {(weatherData?.visibility || 0 / 1000)?.toFixed(0)} m
             </p>
             <p>Viento</p>
             <p className="text-right">
-              {weatherData?.wind.speed}{" "}
+              {weatherData?.wind.speed.toFixed(0)}
+              {" Km/h "}
               {weatherData?.wind.deg && getDireccion(weatherData?.wind.deg)}
             </p>
           </div>
